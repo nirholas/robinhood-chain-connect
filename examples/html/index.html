@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hood-connect web component example</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+  h1 { font-size: 30px; letter-spacing: -0.02em; margin: 0; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.6; margin: 0 0 14px; }
+  .lede { opacity: 0.7; margin: 8px 0 24px; }
+  .columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px; align-items: start; }
+  .controls { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 32px; }
+  label { display: flex; align-items: center; gap: 8px; font-size: 13px; opacity: 0.8; }
+  select { font: inherit; font-size: 13px; padding: 5px 8px; border-radius: 8px; }
+  #log {
+    border: 1px solid rgba(128,128,128,0.35);
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    max-height: 380px;
+    overflow-y: auto;
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  #log:empty::after { content: 'Events appear here as the flow progresses.'; opacity: 0.5; font-family: inherit; }
+  .row { padding: 3px 0; border-bottom: 1px solid rgba(128,128,128,0.15); }
+  .row:last-child { border-bottom: 0; }
+  .type { color: #00a004; }
+</style>
+
+<!--
+  Optional. `qrcode-generator` is UMD, so one script tag is all a page without a
+  bundler needs to get a scannable QR code in the funding step. Remove it and
+  the flow still works: the address stays copyable, which is the path that
+  cannot break.
+-->
+<script src="/vendor/qrcode.js"></script>
+</head>
+<body>
+
+<h1>hood-connect</h1>
+<p class="lede">
+  The same three-step Robinhood Chain onboarding flow as the React component,
+  as a plain custom element. No framework, no build step, no bundler.
+</p>
+
+<div class="controls">
+  <label>
+    Network
+    <select id="network">
+      <option value="mainnet">mainnet (4663)</option>
+      <option value="testnet">testnet (46630)</option>
+    </select>
+  </label>
+  <label>
+    Theme
+    <select id="theme">
+      <option value="auto">auto</option>
+      <option value="light">light</option>
+      <option value="dark">dark</option>
+    </select>
+  </label>
+</div>
+
+<div class="columns">
+  <div>
+    <h2>The element</h2>
+    <hood-connect id="connect" chain="mainnet" theme="auto"></hood-connect>
+  </div>
+  <div>
+    <h2>Events it emits</h2>
+    <div id="log"></div>
+  </div>
+</div>
+
+<script type="module">
+  // In your own page this is `import 'hood-connect/element'`. The example
+  // points at the build output in this repo so it runs straight from a
+  // checkout after `npm run build`.
+  import '/dist/element/index.js'
+
+  const element = document.getElementById('connect')
+  const log = document.getElementById('log')
+
+  const write = (type, detail) => {
+    const row = document.createElement('div')
+    row.className = 'row'
+    row.innerHTML = `<span class="type">${type}</span> ${detail}`
+    log.prepend(row)
+  }
+
+  element.addEventListener('hood-connect:status', (event) => {
+    write('status', `${event.detail.status} (step: ${event.detail.step})`)
+  })
+  element.addEventListener('hood-connect:account', (event) => {
+    write('account', event.detail.address ?? 'disconnected')
+  })
+  element.addEventListener('hood-connect:ready', (event) => {
+    write('ready', `${event.detail.address} on chain ${event.detail.chainId}`)
+  })
+  element.addEventListener('hood-connect:error', (event) => {
+    write('error', `${event.detail.code}: ${event.detail.error.message}`)
+  })
+
+  document.getElementById('network').addEventListener('change', (event) => {
+    element.setAttribute('chain', event.target.value)
+  })
+  document.getElementById('theme').addEventListener('change', (event) => {
+    element.setAttribute('theme', event.target.value)
+  })
+</script>
+
+</body>
+</html>

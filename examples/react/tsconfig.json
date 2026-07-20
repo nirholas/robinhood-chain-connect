@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "hood-connect": ["../../src/index.ts"],
+      "hood-connect/react": ["../../src/react/index.tsx"],
+      "hood-connect/element": ["../../src/element/index.ts"]
+    }
+  },
+  "include": ["src", "vite.config.ts"]
+}
