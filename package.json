@@ -1,6 +1,6 @@
 {
   "name": "hood-connect",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Wallet + onboarding kit for Robinhood Chain dApps (chain 4663 / 46630): one component for add network, fund via bridge, connect. EIP-6963 discovery, a complete onboarding state machine, SSR-safe React hooks, a wagmi connector, and a framework-free web component.",
   "keywords": [
     "robinhood",
@@ -22,11 +22,11 @@
   "author": "nirholas (https://x.com/nichxbt)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nirholas/hood-connect.git"
+    "url": "git+https://github.com/nirholas/robinhood-chain-connect.git"
   },
-  "homepage": "https://nirholas.github.io/hood-connect/",
+  "homepage": "https://nirholas.github.io/robinhood-chain-connect/",
   "bugs": {
-    "url": "https://github.com/nirholas/hood-connect/issues"
+    "url": "https://github.com/nirholas/robinhood-chain-connect/issues"
   },
   "type": "module",
   "engines": {
