@@ -1,0 +1,118 @@
+{
+  "name": "hood-connect",
+  "version": "0.1.0",
+  "description": "Wallet + onboarding kit for Robinhood Chain dApps (chain 4663 / 46630): one component for add network, fund via bridge, connect. EIP-6963 discovery, a complete onboarding state machine, SSR-safe React hooks, a wagmi connector, and a framework-free web component.",
+  "keywords": [
+    "robinhood",
+    "robinhood-chain",
+    "wallet",
+    "connect-wallet",
+    "onboarding",
+    "eip-6963",
+    "eip-1193",
+    "wallet_addEthereumChain",
+    "wagmi",
+    "wagmi-connector",
+    "web-component",
+    "react-hooks",
+    "usdg",
+    "viem"
+  ],
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "nirholas (https://x.com/nichxbt)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nirholas/hood-connect.git"
+  },
+  "homepage": "https://nirholas.github.io/hood-connect/",
+  "bugs": {
+    "url": "https://github.com/nirholas/hood-connect/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "sideEffects": [
+    "./dist/element/index.js",
+    "./dist/element/index.cjs"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js",
+      "require": "./dist/react/index.cjs"
+    },
+    "./wagmi": {
+      "types": "./dist/wagmi/index.d.ts",
+      "import": "./dist/wagmi/index.js",
+      "require": "./dist/wagmi/index.cjs"
+    },
+    "./element": {
+      "types": "./dist/element/index.d.ts",
+      "import": "./dist/element/index.js",
+      "require": "./dist/element/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run tests",
+    "test:watch": "vitest",
+    "example:react": "npm --prefix examples/react run dev",
+    "example:react:build": "npm --prefix examples/react run build",
+    "example:html": "node examples/html/serve.mjs",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "peerDependencies": {
+    "@wagmi/core": "^2.0.0",
+    "qrcode-generator": "^1.4.4",
+    "react": "^18.0.0 || ^19.0.0",
+    "viem": "^2.55.0",
+    "wagmi": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@wagmi/core": {
+      "optional": true
+    },
+    "qrcode-generator": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "wagmi": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@wagmi/core": "^2.16.0",
+    "jsdom": "^25.0.1",
+    "qrcode-generator": "^1.4.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.0",
+    "viem": "^2.55.0",
+    "vitest": "^3.2.0"
+  }
+}
