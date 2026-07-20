@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hood-connect: wallet and onboarding kit for Robinhood Chain dApps</title>
+<meta name="description" content="One component for add network, fund, connect on Robinhood Chain (4663 / 46630). EIP-6963 discovery, an exhaustive onboarding state machine, SSR-safe React hooks, a wagmi connector, and a web component.">
+<link rel="stylesheet" href="./site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%8C%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<nav class="top" aria-label="Site">
+  <div class="wrap">
+    <a class="brand" href="./index.html">hood<span class="tick">-connect</span></a>
+    <div class="links">
+      <a href="#flow">The flow</a>
+      <a href="#params" class="hide-sm">Chain params</a>
+      <a href="#surfaces">Surfaces</a>
+      <a href="#funding" class="hide-sm">Funding</a>
+      <a href="https://github.com/nirholas/robinhood-chain-connect">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <h1>Add network. Fund.<br><span class="grad">Connect.</span></h1>
+  <p class="lede">
+    The wallet and onboarding kit for
+    <a href="https://docs.robinhood.com/chain/">Robinhood Chain</a> dApps, chain 4663 and
+    46630. Thirteen states, three steps, one component. EIP-6963 discovery, the exact
+    EIP-3085 parameters, the 4902 add-then-switch fallback, and a funding step that works
+    even when every bridge is down.
+  </p>
+  <div class="cta">
+    <span class="install"><span class="dollar">$</span> npm install hood-connect viem</span>
+    <a class="btn primary" href="#surfaces">Get started</a>
+    <a class="btn" href="#flow">See the states</a>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section class="block" id="problem">
+  <p class="eyebrow">// the problem</p>
+  <h2>Onboarding is where Robinhood Chain dApps lose people</h2>
+  <p class="sub">
+    A visitor arrives with a wallet, without your network, and with nothing on it. Three
+    things have to happen before your app can do anything, and each one has its own way of
+    going wrong.
+  </p>
+  <div class="problem">
+    <div class="pcard">
+      <span class="num">01</span>
+      <h3>They have a wallet</h3>
+      <p>But maybe several, maybe locked, maybe one that predates EIP-6963 and only sets <code>window.ethereum</code>.</p>
+    </div>
+    <div class="pcard">
+      <span class="num">02</span>
+      <h3>Not your network</h3>
+      <p>The switch fails with 4902 because the wallet has never heard of chain 4663. That is the normal case, not an error.</p>
+    </div>
+    <div class="pcard">
+      <span class="num">03</span>
+      <h3>Zero balance</h3>
+      <p>Connected, correct chain, and still unable to send anything. Bridging is a separate journey off your site.</p>
+    </div>
+    <div class="pcard">
+      <span class="num">04</span>
+      <h3>And it can fail anywhere</h3>
+      <p>4001 rejected, -32002 prompt already open, 4200 unsupported, add refused. Most flows render a blank box.</p>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="flow">
+  <p class="eyebrow">// the state machine</p>
+  <h2>Every state is designed, and the type says so</h2>
+  <p class="sub">
+    <code>OnboardingStatus</code> is an exhaustive union. A <code>switch</code> over it with
+    no <code>default</code> stops compiling the moment a state goes unhandled, so the states
+    people actually hit first cannot be the ones that were skipped.
+  </p>
+  <div class="machine">
+    <div class="lane">
+      <div class="lane-head"><span class="lane-step">1</span><h3>Connect</h3></div>
+      <ul class="states">
+        <li><code>idle</code> the only status rendered on a server</li>
+        <li><code>detecting</code> listening for EIP-6963 announcements</li>
+        <li data-tone="bad"><code>no-wallet</code> install prompt plus a rescan</li>
+        <li><code>disconnected</code> connect button, or a picker for several wallets</li>
+        <li><code>connecting</code> a wallet prompt is open</li>
+        <li data-tone="bad"><code>locked</code> its own state, with its own recovery</li>
+      </ul>
+    </div>
+    <div class="lane">
+      <div class="lane-head"><span class="lane-step">2</span><h3>Network</h3></div>
+      <ul class="states">
+        <li data-tone="bad"><code>wrong-chain</code> names both chain IDs, offers switch and add</li>
+        <li><code>adding-chain</code> <code>wallet_addEthereumChain</code> in flight</li>
+        <li><code>switching-chain</code> <code>wallet_switchEthereumChain</code> in flight</li>
+        <li>4902 triggers add, then retries the switch, automatically</li>
+        <li>a <code>-32603</code> envelope is unwrapped to find the real code</li>
+      </ul>
+    </div>
+    <div class="lane">
+      <div class="lane-head"><span class="lane-step">3</span><h3>Fund</h3></div>
+      <ul class="states">
+        <li><code>checking-balance</code> native and USDG, read together</li>
+        <li data-tone="bad"><code>unfunded</code> bridge routes, address, QR, auto-refresh</li>
+        <li data-tone="ok"><code>ready</code> connected, on chain, funded</li>
+        <li data-tone="bad"><code>error</code> the failure, its hint, and where to retry</li>
+        <li>a failed balance read never reports a false zero</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="params">
+  <p class="eyebrow">// evidence</p>
+  <h2>The parameter object is the whole contract</h2>
+  <p class="sub">
+    Adding a network is one RPC call carrying one object. A zero-padded <code>chainId</code>,
+    a currency symbol outside two to six characters, or a declared chain ID that disagrees
+    with what the RPC answers, and MetaMask refuses. Silently, in every dApp that copied the
+    snippet. Both objects ship exactly, and the test suite asserts them literally.
+  </p>
+  <div class="evidence">
+    <div>
+<pre><code><span class="kw">import</span> { hoodMainnet } <span class="kw">from</span> <span class="str">'hood-connect'</span>
+
+hoodMainnet.addChainParameter
+<span class="cmt">// {</span>
+<span class="cmt">//   chainId: '0x1237',</span>
+<span class="cmt">//   chainName: 'Robinhood Chain',</span>
+<span class="cmt">//   nativeCurrency: {</span>
+<span class="cmt">//     name: 'Ether', symbol: 'ETH', decimals: 18</span>
+<span class="cmt">//   },</span>
+<span class="cmt">//   rpcUrls: [</span>
+<span class="cmt">//     'https://rpc.mainnet.chain.robinhood.com'</span>
+<span class="cmt">//   ],</span>
+<span class="cmt">//   blockExplorerUrls: [</span>
+<span class="cmt">//     'https://robinhoodchain.blockscout.com'</span>
+<span class="cmt">//   ],</span>
+<span class="cmt">// }</span></code></pre>
+    </div>
+    <div>
+      <ul class="check">
+        <li><span class="tick-mark">&#10003;</span> <span><code>0x1237</code> and <code>0xb626</code> decode to 4663 and 46630, unpadded and lowercase, as wallets require.</span></li>
+        <li><span class="tick-mark">&#10003;</span> <span>Every field matches viem's official <code>robinhood</code> and <code>robinhoodTestnet</code> definitions, the same source wagmi uses.</span></li>
+        <li><span class="tick-mark">&#10003;</span> <span>Symbols sit inside the two-to-six character window MetaMask enforces; decimals are 18.</span></li>
+        <li><span class="tick-mark">&#10003;</span> <span>Every URL is https with no trailing slash.</span></li>
+        <li><span class="tick-mark">&#10003;</span> <span>The objects are frozen, so a consumer cannot mutate the copy everyone shares.</span></li>
+        <li><span class="tick-mark">&#10003;</span> <span>A change to any field fails <code>npm test</code> rather than a user's wallet.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="surfaces">
+  <p class="eyebrow">// surfaces</p>
+  <h2>Four ways in, one machine underneath</h2>
+  <p class="sub">
+    The core is framework-agnostic and depends on nothing but viem's types. React, wagmi, and
+    the custom element are thin layers over the same state machine and the same pure
+    state-to-view projection, so they cannot drift apart.
+  </p>
+  <div class="surfaces">
+    <div class="surface">
+      <h3>React <span class="tag">hood-connect/react</span></h3>
+      <p>A drop-in component and headless hooks. SSR-safe: renders <code>idle</code> on the server, hydrates without a warning, and inlines its own styles so there is no unstyled flash.</p>
+<pre><code><span class="kw">import</span> { HoodConnect } <span class="kw">from</span> <span class="str">'hood-connect/react'</span>
+
+&lt;HoodConnect
+  config={{ chain: <span class="str">'mainnet'</span> }}
+  theme=<span class="str">"auto"</span>
+  onReady={(s) =&gt; console.log(s.address)}
+/&gt;</code></pre>
+    </div>
+
+    <div class="surface">
+      <h3>wagmi <span class="tag">hood-connect/wagmi</span></h3>
+      <p>The connector kit wagmi does not ship. Chains, transports, and a <code>switchChain</code> that adds the network before switching, in one import.</p>
+<pre><code><span class="kw">import</span> { createHoodConfig }
+  <span class="kw">from</span> <span class="str">'hood-connect/wagmi'</span>
+
+<span class="kw">export const</span> config = createHoodConfig({
+  networks: [<span class="str">'mainnet'</span>],
+  ssr: <span class="kw">true</span>,
+})</code></pre>
+    </div>
+
+    <div class="surface">
+      <h3>Web component <span class="tag">hood-connect/element</span></h3>
+      <p>A real custom element in a shadow root. Attributes in, DOM events out, no framework and no build step.</p>
+<pre><code>&lt;hood-connect chain=<span class="str">"mainnet"</span>&gt;&lt;/hood-connect&gt;
+
+el.addEventListener(
+  <span class="str">'hood-connect:ready'</span>,
+  (e) =&gt; console.log(e.detail.address)
+)</code></pre>
+    </div>
+
+    <div class="surface">
+      <h3>Core <span class="tag">hood-connect</span></h3>
+      <p>The machine on its own, for any framework or none. Actions resolve with the new state and never reject on a wallet failure, so a click handler cannot leak one.</p>
+<pre><code><span class="kw">import</span> { createOnboarding }
+  <span class="kw">from</span> <span class="str">'hood-connect'</span>
+
+<span class="kw">const</span> o = createOnboarding()
+o.subscribe(render)
+o.start()</code></pre>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="funding">
+  <p class="eyebrow">// step three</p>
+  <h2>Funding routes, not a bridge contract</h2>
+  <p class="sub">
+    Robinhood Chain is an Arbitrum Orbit chain, so its canonical deposit path is the Arbitrum
+    portal, not a contract this package could call. Nothing here moves funds, signs, or holds
+    a key. The mainnet routes are the ones
+    <a href="https://docs.robinhood.com/chain/bridging/">the chain's own bridging docs</a> list.
+  </p>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>Route</th><th>Destination</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>arbitrum-canonical</code></td>
+          <td><code>portal.arbitrum.io/bridge</code></td>
+          <td>Trust-minimised, inherits Ethereum security, around 10 minutes</td>
+        </tr>
+        <tr><td><code>relay</code></td><td><code>relay.link/bridge/robinhood</code></td><td>Seconds, for a small fee</td></tr>
+        <tr><td><code>across</code></td><td><code>across.to/?to=robinhood</code></td><td>Intent-based, most EVM chains</td></tr>
+        <tr><td><code>stargate</code></td><td><code>stargate.finance</code></td><td>LayerZero, useful for stablecoins</td></tr>
+        <tr>
+          <td><code>receive</code></td>
+          <td>The user's own address</td>
+          <td>Always present, always last. EIP-681 URI pinned to <code>@4663</code>, plus a QR</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="sub" style="margin-top:22px">
+    The <code>receive</code> route ships on every network and under every configuration,
+    because it is the only one that cannot break: anyone who can get ETH anywhere can send it
+    to their own address. Its URI carries the chain ID, which is what keeps a scanned code
+    off Ethereum mainnet. The testnet has no documented public bridge, so there
+    <code>receive</code> is the only default and you supply your own routes rather than
+    finding a broken link.
+  </p>
+</section>
+
+<section class="block" id="errors">
+  <p class="eyebrow">// failure handling</p>
+  <h2>Wallet error codes, normalised once</h2>
+  <p class="sub">
+    Wallets disagree about how to report the same condition. Several wrap the real code in a
+    generic <code>-32603</code>, and some only say it in prose. Every failure becomes one of
+    a small closed set, each with a recovery hint written for a user and a
+    <code>retryable</code> flag so the UI never offers a pointless button.
+  </p>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Provider</th><th>Code</th><th>What the user is told</th></tr></thead>
+      <tbody>
+        <tr><td><code>4001</code></td><td><code>user-rejected</code></td><td>You dismissed the wallet prompt. Try again when you are ready.</td></tr>
+        <tr><td><code>4902</code></td><td><code>chain-not-added</code></td><td>Handled automatically: the network is added, then the switch retried.</td></tr>
+        <tr><td><code>-32002</code></td><td><code>request-pending</code></td><td>A wallet prompt is already open. Finish it, then retry.</td></tr>
+        <tr><td><code>4200</code>, <code>-32601</code></td><td><code>unsupported-method</code></td><td>This wallet cannot add networks from a website. Switch manually. Not retryable.</td></tr>
+        <tr><td><code>4100</code></td><td><code>unauthorized</code></td><td>This site is not authorised. Reconnect from your wallet.</td></tr>
+        <tr><td><code>4900</code>, <code>4901</code></td><td><code>wallet-disconnected</code></td><td>Your wallet lost its connection to the chain.</td></tr>
+        <tr><td>empty accounts</td><td><code>wallet-locked</code></td><td>Its own state, not a generic error: unlock, then retry.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="block" id="start">
+  <p class="eyebrow">// quickstart</p>
+  <h2>Three lines to a working flow</h2>
+<pre><code><span class="cmt">$ npm install hood-connect viem</span>
+<span class="cmt">$ npm install qrcode-generator   # optional, adds the QR to the funding step</span>
+
+<span class="kw">import</span> { HoodConnect } <span class="kw">from</span> <span class="str">'hood-connect/react'</span>
+
+<span class="kw">export function</span> Page() {
+  <span class="kw">return</span> &lt;HoodConnect config={{ chain: <span class="str">'mainnet'</span> }} theme=<span class="str">"auto"</span> /&gt;
+}</code></pre>
+  <p class="sub" style="margin-top:22px">
+    Node 20 or newer. <code>viem</code> is a peer dependency; <code>react</code>,
+    <code>wagmi</code>, <code>@wagmi/core</code>, and <code>qrcode-generator</code> are
+    optional peers, so the base install stays small. Full wiring for Next.js, wagmi, and a
+    plain page is in
+    <a href="https://github.com/nirholas/robinhood-chain-connect/blob/main/INTEGRATION.md">INTEGRATION.md</a>.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>hood-connect &#183; Robinhood Chain 4663 / 46630</span>
+    <span>
+      <a href="https://github.com/nirholas/robinhood-chain-connect">GitHub</a> &#183;
+      <a href="https://docs.robinhood.com/chain/">Chain docs</a> &#183;
+      <a href="https://robinhoodchain.blockscout.com">Explorer</a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>
