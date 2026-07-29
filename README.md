@@ -324,9 +324,9 @@ See [INTEGRATION.md](./INTEGRATION.md) for wiring into Next.js, Vite, wagmi, and
 
 ## Related
 
-Part of the Robinhood Chain fleet: [`hoodchain`](https://github.com/nirholas/hoodchain) (SDK),
-[`hoodkit`](https://github.com/nirholas/hoodkit) (streams, indexer, hooks),
-[`hood402`](https://github.com/nirholas/hood402) (x402 payments over USDG).
+Part of the Robinhood Chain fleet: [`hoodchain`](https://github.com/nirholas/robinhood-chain-sdk) (SDK),
+[`hoodkit`](https://github.com/nirholas/robinhood-chain-kit) (streams, indexer, hooks),
+[`hood402`](https://github.com/nirholas/robinhood-chain-x402) (x402 payments over USDG).
 
 ## License
 
