@@ -331,3 +331,7 @@ Part of the Robinhood Chain fleet: [`hoodchain`](https://github.com/nirholas/rob
 ## License
 
 Proprietary, all rights reserved. See [LICENSE](./LICENSE).
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=nirholas/robinhood-chain-connect&type=Date)](https://www.star-history.com/#nirholas/robinhood-chain-connect&Date)
