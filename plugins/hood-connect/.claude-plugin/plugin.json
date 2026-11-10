@@ -1,0 +1,17 @@
+{
+  "name": "hood-connect",
+  "version": "0.1.1",
+  "description": "Wallet and onboarding kit for Robinhood Chain dApps: add network, fund via bridge and connect, in React, wagmi or plain HTML.",
+  "author": {
+    "name": "nirholas"
+  },
+  "repository": "https://github.com/nirholas/robinhood-chain-connect",
+  "homepage": "https://nirholas.github.io/robinhood-chain-connect/",
+  "keywords": [
+    "robinhood-chain",
+    "wallet",
+    "onboarding",
+    "wagmi",
+    "react"
+  ]
+}
